@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AI Question Generator</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            background: #f5f7fb;
+            color: #111827;
+        }
+
+        .container {
+            width: min(1100px, 92%);
+            margin: 45px auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header h1 {
+            font-size: 38px;
+            margin-bottom: 10px;
+            color: #111827;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 17px;
+        }
+
+        /* ==================================================
+           GENERATOR
+        ================================================== */
+
+        .generator-card {
+            background: white;
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow:
+                0 10px 35px rgba(15, 23, 42, 0.08);
+
+            margin-bottom: 35px;
+        }
+
+        .label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        textarea {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 15px;
+            resize: vertical;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        textarea:focus {
+            border-color: #6366f1;
+            box-shadow:
+                0 0 0 3px rgba(99, 102, 241, 0.12);
+        }
+
+        #studyContent {
+            min-height: 170px;
+        }
+
+        .question-types {
+            display: grid;
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .type-option {
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .type-option:hover {
+            border-color: #6366f1;
+        }
+
+        .type-option.active {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+
+        .generate-btn,
+        .submit-btn,
+        .retry-btn,
+        .another-btn {
+            border: none;
+            border-radius: 10px;
+            padding: 14px 22px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .generate-btn {
+            width: 100%;
+            margin-top: 25px;
+            background: #6366f1;
+            color: white;
+        }
+
+        .generate-btn:hover,
+        .submit-btn:hover,
+        .retry-btn:hover,
+        .another-btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.92;
+        }
+
+        /* ==================================================
+           TEST HEADER
+        ================================================== */
+
+        .test-section {
+            display: none;
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .test-header h2 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .progress {
+            background: #eef2ff;
+            color: #4f46e5;
+            padding: 10px 17px;
+            border-radius: 30px;
+            font-weight: 700;
+        }
+
+        /* ==================================================
+           QUESTION CARD
+        ================================================== */
+
+        .question-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            padding: 30px;
+            margin-bottom: 22px;
+            box-shadow:
+                0 8px 25px rgba(15, 23, 42, 0.05);
+        }
+
+        .question-number {
+            display: inline-block;
+            background: #eef2ff;
+            color: #4f46e5;
+            padding: 8px 13px;
+            border-radius: 8px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .question-text {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.5;
+            margin-bottom: 22px;
+        }
+
+        /* ==================================================
+           MCQ OPTIONS
+        ================================================== */
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .option:hover {
+            border-color: #6366f1;
+            background: #f8f9ff;
+        }
+
+        .option-letter {
+            min-width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .option.correct {
+            border-color: #16a34a;
+            background: #f0fdf4;
+        }
+
+        .option.correct .option-letter {
+            background: #16a34a;
+            color: white;
+        }
+
+        .option.wrong {
+            border-color: #dc2626;
+            background: #fef2f2;
+        }
+
+        .option.wrong .option-letter {
+            background: #dc2626;
+            color: white;
+        }
+
+        .option.disabled {
+            cursor: default;
+        }
+
+        /* ==================================================
+           ANSWER FEEDBACK
+        ================================================== */
+
+        .feedback {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .feedback.correct {
+            display: block;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .feedback.wrong {
+            display: block;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .feedback-title {
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .explanation {
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        /* ==================================================
+           SHORT ANSWER / INTERVIEW
+        ================================================== */
+
+        .answer-box {
+            min-height: 140px;
+            margin-bottom: 15px;
+        }
+
+        .submit-btn {
+            background: #6366f1;
+            color: white;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .model-answer {
+            display: none;
+            margin-top: 20px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 12px;
+            padding: 22px;
+        }
+
+        .model-answer.show {
+            display: block;
+        }
+
+        .answer-title {
+            color: #1d4ed8;
+            font-weight: 800;
+            font-size: 17px;
+            margin-bottom: 12px;
+        }
+
+        .answer-content {
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        .explanation-title {
+            margin-top: 22px;
+            color: #1d4ed8;
+            font-weight: 800;
+        }
+
+        .points {
+            margin-top: 10px;
+            padding-left: 20px;
+            line-height: 1.8;
+        }
+
+        /* ==================================================
+           SCORE CARD
+        ================================================== */
+
+        .score-card {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            margin: 35px 0;
+            text-align: center;
+            box-shadow:
+                0 10px 35px rgba(15, 23, 42, 0.10);
+        }
+
+        .score-card.show {
+            display: block;
+        }
+
+        .score-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 25px;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #eef2ff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 25px;
+        }
+
+        .score-number {
+            font-size: 38px;
+            font-weight: 800;
+            color: #4f46e5;
+        }
+
+        .score-label {
+            color: #64748b;
+        }
+
+        .score-stats {
+            display: grid;
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            background: #f8fafc;
+            padding: 18px;
+            border-radius: 12px;
+        }
+
+        .stat-number {
+            font-size: 25px;
+            font-weight: 800;
+        }
+
+        .stat-label {
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        .score-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .retry-btn {
+            background: #6366f1;
+            color: white;
+        }
+
+        .another-btn {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        /* ==================================================
+           LOADING / ERROR
+        ================================================== */
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #6366f1;
+            font-weight: 700;
+        }
+
+        .error {
+            display: none;
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        /* ==================================================
+           RESPONSIVE
+        ================================================== */
+
+        @media (max-width: 700px) {
+
+            .header h1 {
+                font-size: 30px;
+            }
+
+            .question-types {
+                grid-template-columns: 1fr;
+            }
+
+            .test-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .score-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .score-actions {
+                flex-direction: column;
+            }
+
+            .retry-btn,
+            .another-btn {
+                width: 100%;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="header">
+
+        <h1>AI Question Generator</h1>
+
+        <p>
+            Generate personalized study questions using Google Gemini AI.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         GENERATOR
+    ====================================================== -->
+
+    <div class="generator-card">
+
+        <label class="label">
+            Study Content
+        </label>
+
+        <textarea
+            id="studyContent"
+            placeholder="Paste your notes, or topic content here..."
+        ></textarea>
+
+
+        <label
+            class="label"
+            style="margin-top: 25px;"
+        >
+            Question Type
+        </label>
+
+
+        <div class="question-types">
+
+            <div
+                class="type-option active"
+                data-type="MCQs"
+            >
+                MCQs
+            </div>
+
+            <div
+                class="type-option"
+                data-type="Short Answer"
+            >
+                Short Answer
+            </div>
+
+            <div
+                class="type-option"
+                data-type="Interview"
+            >
+                Interview
+            </div>
+
+        </div>
+
+
+        <button
+            class="generate-btn"
+            onclick="generateQuestions()"
+        >
+            Generate Questions
+        </button>
+
+
+        <div
+            class="loading"
+            id="loading"
+        >
+            Generating your questions...
+        </div>
+
+
+        <div
+            class="error"
+            id="error"
+        ></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TEST SECTION
+    ====================================================== -->
+
+    <div
+        class="test-section"
+        id="testSection"
+    >
+
+        <div class="test-header">
+
+            <h2>
+                Test Questions
+            </h2>
+
+            <div
+                class="progress"
+                id="progress"
+            >
+                0 / 5 Answered
+            </div>
+
+        </div>
+
+
+        <div id="questionsContainer"></div>
+
+
+        <!-- =================================================
+             SCORE CARD
+        ================================================== -->
+
+        <div
+            class="score-card"
+            id="scoreCard"
+        >
+
+            <div class="score-title">
+                Test Completed 🎉
+            </div>
+
+
+            <div class="score-circle">
+
+                <div
+                    class="score-number"
+                    id="scorePercentage"
+                >
+                    0%
+                </div>
+
+                <div class="score-label">
+                    Score
+                </div>
+
+            </div>
+
+
+            <div class="score-stats">
+
+                <div class="stat">
+
+                    <div
+                        class="stat-number"
+                        id="correctCount"
+                    >
+                        0
+                    </div>
+
+                    <div class="stat-label">
+                        Correct
+                    </div>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <div
+                        class="stat-number"
+                        id="wrongCount"
+                    >
+                        0
+                    </div>
+
+                    <div class="stat-label">
+                        Incorrect
+                    </div>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <div
+                        class="stat-number"
+                        id="totalCount"
+                    >
+                        5
+                    </div>
+
+                    <div class="stat-label">
+                        Total
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="score-actions">
+
+                <button
+                    class="retry-btn"
+                    onclick="retryTest()"
+                >
+                    Retry Test
+                </button>
+
+                <button
+                    class="another-btn"
+                    onclick="takeAnotherTest()"
+                >
+                    Take Another Test
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // ========================================================
+    // GLOBAL VARIABLES
+    // ========================================================
+
+    let selectedType = "MCQs";
+
+    let currentTestId = null;
+
+    let currentQuestions = [];
+
+    let answeredQuestions = 0;
+
+    let correctAnswers = 0;
+
+    let wrongAnswers = 0;
+
+
+    // ========================================================
+    // QUESTION TYPE SELECTION
+    // ========================================================
+
+    document
+        .querySelectorAll(".type-option")
+        .forEach(option => {
+
+            option.addEventListener("click", () => {
+
+                document
+                    .querySelectorAll(".type-option")
+                    .forEach(item => {
+
+                        item.classList.remove("active");
+
+                    });
+
+                option.classList.add("active");
+
+                selectedType =
+                    option.dataset.type;
+
+            });
+
+        });
+
+
+    // ========================================================
+    // GENERATE QUESTIONS
+    // ========================================================
+
+    async function generateQuestions() {
+
+        const content =
+            document
+                .getElementById("studyContent")
+                .value
+                .trim();
+
+        const loading =
+            document.getElementById("loading");
+
+        const error =
+            document.getElementById("error");
+
+        const testSection =
+            document.getElementById("testSection");
+
+
+        if (!content) {
+
+            showError(
+                "Please enter your study content."
+            );
+
+            return;
+        }
+
+
+        error.style.display = "none";
+
+        loading.style.display = "block";
+
+
+        try {
+
+            const response =
+                await fetch("/generate", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        content: content,
+
+                        question_type:
+                            selectedType
+
+                    })
+
+                });
+
+
+            const data =
+                await response.json();
+
+
+            if (data.error) {
+
+                throw new Error(
+                    data.error
+                );
+
+            }
+
+
+            currentTestId =
+                data.test_id;
+
+            currentQuestions =
+                data.questions;
+
+            answeredQuestions = 0;
+
+            correctAnswers = 0;
+
+            wrongAnswers = 0;
+
+
+            renderQuestions();
+
+
+            testSection.style.display =
+                "block";
+
+
+            document
+                .getElementById("scoreCard")
+                .classList.remove("show");
+
+
+            updateProgress();
+
+
+            setTimeout(() => {
+
+                testSection.scrollIntoView({
+                    behavior: "smooth"
+                });
+
+            }, 100);
+
+
+        }
+        catch (error) {
+
+            showError(
+                error.message
+            );
+
+        }
+        finally {
+
+            loading.style.display = "none";
+
+        }
+
+    }
+
+
+    // ========================================================
+    // RENDER QUESTIONS
+    // ========================================================
+
+    function renderQuestions() {
+
+        const container =
+            document.getElementById(
+                "questionsContainer"
+            );
+
+        container.innerHTML = "";
+
+
+        currentQuestions.forEach(
+            question => {
+
+                const card =
+                    document.createElement("div");
+
+                card.className =
+                    "question-card";
+
+
+                if (selectedType === "MCQs") {
+
+                    card.innerHTML =
+                        createMCQ(question);
+
+                }
+                else {
+
+                    card.innerHTML =
+                        createTextQuestion(question);
+
+                }
+
+
+                container.appendChild(card);
+
+            }
+        );
+
+    }
+
+
+    // ========================================================
+    // CREATE MCQ
+    // ========================================================
+
+    function createMCQ(question) {
+
+        const options =
+            question.options
+                .map(option => `
+
+                    <div
+                        class="option"
+                        data-question="${question.number}"
+                        data-letter="${option.letter}"
+                        onclick="selectOption(
+                            ${question.number},
+                            '${option.letter}',
+                            this
+                        )"
+                    >
+
+                        <div class="option-letter">
+                            ${option.letter}
+                        </div>
+
+                        <div>
+                            ${escapeHTML(option.text)}
+                        </div>
+
+                    </div>
+
+                `)
+                .join("");
+
+
+        return `
+
+            <div class="question-number">
+                Question ${question.number}
+            </div>
+
+            <div class="question-text">
+                ${escapeHTML(question.question)}
+            </div>
+
+            <div class="options">
+                ${options}
+            </div>
+
+            <div
+                class="feedback"
+                id="feedback-${question.number}"
+            ></div>
+
+        `;
+
+    }
+
+
+    // ========================================================
+    // CREATE SHORT ANSWER / INTERVIEW
+    // ========================================================
+
+    function createTextQuestion(question) {
+
+        return `
+
+            <div class="question-number">
+                Question ${question.number}
+            </div>
+
+            <div class="question-text">
+                ${escapeHTML(question.question)}
+            </div>
+
+            <textarea
+                class="answer-box"
+                id="answer-${question.number}"
+                placeholder="Write your answer here..."
+            ></textarea>
+
+            <button
+                class="submit-btn"
+                id="submit-${question.number}"
+                onclick="submitTextAnswer(
+                    ${question.number}
+                )"
+            >
+                Submit Answer
+            </button>
+
+            <div
+                class="model-answer"
+                id="model-${question.number}"
+            >
+
+                <div class="answer-title">
+                    Model Answer
+                </div>
+
+                <div
+                    class="answer-content"
+                    id="model-content-${question.number}"
+                ></div>
+
+
+                <div class="explanation-title">
+                    Explanation
+                </div>
+
+                <div
+                    class="answer-content"
+                    id="explanation-${question.number}"
+                ></div>
+
+
+                <div
+                    id="points-container-${question.number}"
+                ></div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    // ========================================================
+    // SELECT MCQ OPTION
+    // ========================================================
+
+    async function selectOption(
+        questionNumber,
+        selectedLetter,
+        element
+    ) {
+
+        const allOptions =
+            document.querySelectorAll(
+                `[data-question="${questionNumber}"]`
+            );
+
+
+        // Prevent changing answer
+        // after selection.
+
+        const alreadyAnswered =
+            Array.from(allOptions)
+                .some(option =>
+                    option.classList.contains("disabled")
+                );
+
+
+        if (alreadyAnswered) {
+            return;
+        }
+
+
+        allOptions.forEach(option => {
+
+            option.classList.add("disabled");
+
+        });
+
+
+        const response =
+            await fetch("/check-answer", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    test_id:
+                        currentTestId,
+
+                    question_number:
+                        questionNumber,
+
+                    answer:
+                        selectedLetter
+
+                })
+
+            });
+
+
+        const result =
+            await response.json();
+
+
+        if (result.error) {
+
+            alert(result.error);
+
+            return;
+
+        }
+
+
+        answeredQuestions++;
+
+
+        if (result.correct) {
+
+            correctAnswers++;
+
+        }
+        else {
+
+            wrongAnswers++;
+
+        }
+
+
+        // Highlight selected answer
+
+        element.classList.add(
+            result.correct
+                ? "correct"
+                : "wrong"
+        );
+
+
+        // Highlight correct answer
+
+        allOptions.forEach(option => {
+
+            if (
+                option.dataset.letter ===
+                result.correct_answer
+            ) {
+
+                option.classList.add(
+                    "correct"
+                );
+
+            }
+
+        });
+
+
+        const feedback =
+            document.getElementById(
+                `feedback-${questionNumber}`
+            );
+
+
+        feedback.className =
+            result.correct
+                ? "feedback correct"
+                : "feedback wrong";
+
+
+        feedback.innerHTML = `
+
+            <div class="feedback-title">
+
+                ${
+                    result.correct
+                        ? "✓ Correct Answer!"
+                        : "✗ Incorrect Answer"
+                }
+
+            </div>
+
+            <div>
+
+                Correct Answer:
+                <strong>
+                    ${result.correct_answer})
+                    ${escapeHTML(
+                        result.correct_option_text
+                    )}
+                </strong>
+
+            </div>
+
+            <div class="explanation">
+
+                <strong>Explanation:</strong><br>
+
+                ${escapeHTML(
+                    result.explanation
+                )}
+
+            </div>
+
+        `;
+
+
+        updateProgress();
+
+    }
+
+
+    // ========================================================
+    // SUBMIT SHORT ANSWER / INTERVIEW
+    // ========================================================
+
+    async function submitTextAnswer(
+        questionNumber
+    ) {
+
+        const textarea =
+            document.getElementById(
+                `answer-${questionNumber}`
+            );
+
+        const submitButton =
+            document.getElementById(
+                `submit-${questionNumber}`
+            );
+
+
+        const answer =
+            textarea.value.trim();
+
+
+        if (!answer) {
+
+            alert(
+                "Please write your answer before submitting."
+            );
+
+            return;
+
+        }
+
+
+        submitButton.disabled = true;
+
+        submitButton.textContent =
+            "Submitting...";
+
+
+        try {
+
+            const response =
+                await fetch("/submit-answer", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        test_id:
+                            currentTestId,
+
+                        question_number:
+                            questionNumber,
+
+                        answer:
+                            answer
+
+                    })
+
+                });
+
+
+            const result =
+                await response.json();
+
+
+            if (result.error) {
+
+                throw new Error(
+                    result.error
+                );
+
+            }
+
+
+            answeredQuestions++;
+
+
+            textarea.disabled = true;
+
+
+            submitButton.textContent =
+                "Answer Submitted ✓";
+
+
+            const modelBox =
+                document.getElementById(
+                    `model-${questionNumber}`
+                );
+
+
+            document.getElementById(
+                `model-content-${questionNumber}`
+            ).textContent =
+                result.model_answer;
+
+
+            document.getElementById(
+                `explanation-${questionNumber}`
+            ).textContent =
+                result.explanation;
+
+
+            // Interview evaluation points
+
+            const pointsContainer =
+                document.getElementById(
+                    `points-container-${questionNumber}`
+                );
+
+
+            if (
+                result.evaluation_points &&
+                result.evaluation_points.length > 0
+            ) {
+
+                pointsContainer.innerHTML = `
+
+                    <div class="explanation-title">
+                        Important Points
+                    </div>
+
+                    <ul class="points">
+
+                        ${result.evaluation_points
+                            .map(point =>
+                                `<li>${escapeHTML(point)}</li>`
+                            )
+                            .join("")}
+
+                    </ul>
+
+                `;
+
+            }
+
+
+            modelBox.classList.add("show");
+
+
+            updateProgress();
+
+
+            if (
+                answeredQuestions ===
+                currentQuestions.length
+            ) {
+
+                showCompletionMessage();
+
+            }
+
+        }
+        catch (error) {
+
+            alert(
+                error.message
+            );
+
+            submitButton.disabled = false;
+
+            submitButton.textContent =
+                "Submit Answer";
+
+        }
+
+    }
+
+
+    // ========================================================
+    // UPDATE PROGRESS
+    // ========================================================
+
+    function updateProgress() {
+
+        document.getElementById(
+            "progress"
+        ).textContent =
+            `${answeredQuestions} / ${currentQuestions.length} Answered`;
+
+
+        if (
+            selectedType === "MCQs" &&
+            answeredQuestions ===
+            currentQuestions.length
+        ) {
+
+            showScoreCard();
+
+        }
+
+    }
+
+
+    // ========================================================
+    // SHOW MCQ SCORE
+    // ========================================================
+
+    function showScoreCard() {
+
+        const percentage =
+            Math.round(
+                (correctAnswers /
+                    currentQuestions.length) *
+                100
+            );
+
+
+        document.getElementById(
+            "scorePercentage"
+        ).textContent =
+            `${percentage}%`;
+
+
+        document.getElementById(
+            "correctCount"
+        ).textContent =
+            correctAnswers;
+
+
+        document.getElementById(
+            "wrongCount"
+        ).textContent =
+            wrongAnswers;
+
+
+        document.getElementById(
+            "totalCount"
+        ).textContent =
+            currentQuestions.length;
+
+
+        document
+            .getElementById("scoreCard")
+            .classList.add("show");
+
+
+        setTimeout(() => {
+
+            document
+                .getElementById("scoreCard")
+                .scrollIntoView({
+                    behavior: "smooth"
+                });
+
+        }, 300);
+
+    }
+
+
+    // ========================================================
+    // COMPLETION FOR SHORT ANSWER / INTERVIEW
+    // ========================================================
+
+    function showCompletionMessage() {
+
+        const card =
+            document.getElementById(
+                "scoreCard"
+            );
+
+
+        document.querySelector(
+            ".score-title"
+        ).textContent =
+            "Test Completed 🎉";
+
+
+        document.querySelector(
+            ".score-circle"
+        ).style.display =
+            "none";
+
+
+        document.querySelector(
+            ".score-stats"
+        ).style.display =
+            "none";
+
+
+        card.classList.add("show");
+
+
+        setTimeout(() => {
+
+            card.scrollIntoView({
+                behavior: "smooth"
+            });
+
+        }, 300);
+
+    }
+
+
+    // ========================================================
+    // RETRY TEST
+    // ========================================================
+
+    function retryTest() {
+
+        answeredQuestions = 0;
+
+        correctAnswers = 0;
+
+        wrongAnswers = 0;
+
+
+        document
+            .getElementById("scoreCard")
+            .classList.remove("show");
+
+
+        // Restore score card
+
+        document.querySelector(
+            ".score-circle"
+        ).style.display =
+            "flex";
+
+
+        document.querySelector(
+            ".score-stats"
+        ).style.display =
+            "grid";
+
+
+        document.querySelector(
+            ".score-title"
+        ).textContent =
+            "Test Completed 🎉";
+
+
+        renderQuestions();
+
+        updateProgress();
+
+
+        window.scrollTo({
+
+            top: document
+                .getElementById("testSection")
+                .offsetTop,
+
+            behavior: "smooth"
+
+        });
+
+    }
+
+
+    // ========================================================
+    // TAKE ANOTHER TEST
+    // ========================================================
+
+    function takeAnotherTest() {
+
+        document
+            .getElementById("testSection")
+            .style.display =
+            "none";
+
+
+        document
+            .getElementById("studyContent")
+            .value = "";
+
+
+        document
+            .getElementById("scoreCard")
+            .classList.remove("show");
+
+
+        answeredQuestions = 0;
+
+        correctAnswers = 0;
+
+        wrongAnswers = 0;
+
+        currentTestId = null;
+
+        currentQuestions = [];
+
+
+        window.scrollTo({
+
+            top: 0,
+
+            behavior: "smooth"
+
+        });
+
+    }
+
+
+    // ========================================================
+    // ERROR MESSAGE
+    // ========================================================
+
+    function showError(message) {
+
+        const error =
+            document.getElementById("error");
+
+        error.textContent =
+            message;
+
+        error.style.display =
+            "block";
+
+    }
+
+
+    // ========================================================
+    // HTML ESCAPE
+    // ========================================================
+
+    function escapeHTML(text) {
+
+        const div =
+            document.createElement("div");
+
+        div.textContent =
+            text;
+
+        return div.innerHTML;
+
+    }
+
+</script>
+
+</body>
+
+</html>
